@@ -1,31 +1,49 @@
-import React, { use } from "react";
-import { Link } from "react-router";
+import React, { use, useState } from "react";
+import { Link, useNavigate } from "react-router";
 import { AuthContext } from "../provider/AuthProvider";
 
 const Register = () => {
-    const {createUser, setUser} = use(AuthContext);
+  const { createUser, setUser, updateUser } = use(AuthContext);
+  const [nameError, setNameError] = useState("");
+  const navigate = useNavigate();
+
   const handleRegister = (e) => {
     e.preventDefault();
     console.log(e.target);
     const form = e.target;
     const name = form.name.value;
+    if (name.length < 5) {
+      setNameError("name should be more than 5 characters");
+      return;
+    } else {
+      setNameError("");
+    }
     const photo = form.photo.value;
     const email = form.email.value;
     const password = form.password.value;
     console.log({ name, photo, email, password });
     createUser(email, password)
-    .then(result=>{
+      .then((result) => {
         const user = result.user;
         // console.log(user);
-        setUser(user);
-        
-    })
-    .catch((error) => {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    alert(errorMessage);
-    // ..
-  });
+        updateUser({ displayName: name, photoURL: photo })
+          .then(() => {
+            setUser({...user, displayName: name, photoURL: photo});
+            navigate("/");
+          })
+          .catch((error) => {
+            // An error occurred
+            // ...
+            console.log(error);
+            setUser(user);
+          });
+      })
+      .catch((error) => {
+        // const errorCode = error.code;
+        const errorMessage = error.message;
+        alert(errorMessage);
+        // ..
+      });
   };
   return (
     <div className="flex justify-center items-center min-h-screen">
@@ -45,14 +63,16 @@ const Register = () => {
               required
             />
 
+            {nameError && <p className="text-red-500 text-xs">{nameError}</p>}
+
             {/* Photo URL */}
             <label className="label">Photo URL</label>
             <input
               name="photo"
-              type="email"
+              type="text"
               className="input"
               placeholder="Photo URL"
-              
+              required
             />
 
             {/* email */}

@@ -3,7 +3,7 @@ import { Navigate } from 'react-router';
 
 const Home = () => {
     return (
-        <div>
+        <div >
            <Navigate to="/category/1"></Navigate>
         </div>
     );
